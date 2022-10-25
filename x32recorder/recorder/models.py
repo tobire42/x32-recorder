@@ -17,11 +17,11 @@ class Recording(models.Model):
     state = models.IntegerField(default=NEW)
 
     @classmethod
-    def get_active():
-        active_recordings = Recording.objects.exclude(state=Recording.STOPPED)
+    def get_active(cls):
+        active_recordings = cls.objects.exclude(state=cls.STOPPED)
         try:
             return active_recordings.get()
-        except Recording.DoesNotExist:
+        except cls.DoesNotExist:
             return None
 
     def __str__(self) -> str:
