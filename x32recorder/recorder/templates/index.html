@@ -7,10 +7,26 @@
     <title>X32 Recorder</title>
 </head>
 <body>
+
+    {% if recording_active %}
+    {% if recording_active.state == 0 %}<!-- NEW -->
+    <h1>Aufnahme wird gestartet</h1>
+    {% elif recording_active.state == 1 %}<!-- RECORD -->
+    <h1>Aufnahme läuft</h1>
+    <form method="POST" action="stoprecording/">
+        {% csrf_token %}
+        <input type="submit" value="Aufnahme Stoppen" />
+    </form>
+    {% elif recording_active.state == 2 %}<!-- STOP -->
+    <h1>Aufnahme wird beendet</h1>
+    {% endif %}
+
+    {% else %}
     <form method="POST" action="startrecording/">
         {% csrf_token %}
         <input type="submit" value="Aufnahme Starten" />
     </form>
+    {% endif %}
 
     <ul>
         {% for recording in recordings %}

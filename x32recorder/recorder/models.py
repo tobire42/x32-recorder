@@ -5,7 +5,9 @@ class Recording(models.Model):
     NEW = 0
     RECORD = 1
     STOP = 2
+
     STOPPED = 3
+
     PLAYING = 4
 
     date = models.DateTimeField(auto_now_add=True)
