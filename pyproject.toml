@@ -5,7 +5,7 @@ description = ""
 authors = ["Tobias Reineke <tobi@g3th.net>"]
 
 [tool.poetry.dependencies]
-python = ">=3.7,<4"
+python = ">=3.8,<4"
 Django = "^4.1.2"
 
 [tool.poetry.dev-dependencies]
