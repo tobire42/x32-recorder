@@ -3,16 +3,8 @@ from django.shortcuts import render, redirect
 from .models import Recording
 
 
-def get_active_recording():
-    active_recordings = Recording.objects.exclude(state=Recording.STOPPED)
-    try:
-        return active_recordings.get()
-    except Recording.DoesNotExist:
-        return None
-
-
 def index(request):
-    recording_active = get_active_recording()
+    recording_active = Recording.get_active()
 
     return render(
         request,
@@ -32,7 +24,7 @@ def startrecording(request):
 
 
 def stoprecording(request):
-    recording_active = get_active_recording()
+    recording_active = Recording.get_active()
     recording_active.state = Recording.STOP
     recording_active.save()
     return redirect(index)
