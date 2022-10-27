@@ -8,56 +8,62 @@
 </head>
 <body>
     {% load static %}
-    <!-- {% load static %}
-    <img src="{% static 'icons/circle-pause-solid.svg' %}" alt="My image">
-    -->
+    <h1>X32 Recorder</h1>
+    
     <table>
         <tr>
-            <td>
+            <td height="300" width="200">
                 <!-- Aufnahme Feld -->
                 {% if recording_active %}
-                {% if recording_active.state == 0 %}<!-- NEW -->
-                <h1>Aufnahme wird gestartet</h1>
-                {% elif recording_active.state == 1 %}<!-- RECORD -->
-                <h1>Aufnahme läuft</h1>
-                <form method="POST" action="stoprecording/">
-                    {% csrf_token %}
-                    <input type="image" src="{% static 'icons/circle-stop-solid.svg' %}" alt="Aufnahme Stoppen" height="200" width="200"  value="Aufnahme Stoppen" />
-                </form>
-                {% elif recording_active.state == 2 %}<!-- STOP -->
-                <h1>Aufnahme wird beendet</h1>
-                {% endif %}
+                    {% if recording_active.state == 0 %}<!-- NEW -->
+                        <h3>Aufnahme wird gestartet</h3>
+                    {% elif recording_active.state == 1 %}<!-- RECORD -->
+                        <h3>Aufnahme läuft</h3>
+                        <form method="POST" action="stoprecording/">
+                            {% csrf_token %}
+                            <input type="image" src="{% static 'icons/circle-stop-solid.svg' %}" alt="Aufnahme Stoppen" height="200" width="200"  value="Aufnahme Stoppen" />
+                        </form>
+                    {% elif recording_active.state == 2 %}<!-- STOP -->
+                        <h2>Aufnahme wird beendet</h2>
+                    
+                    {% elif recording_active.state == 4 %}<!-- PLAYING -->
+                        <h3>Aufnahme läuft</h3>
+                        <form method="POST" action="stoprecording/">
+                            {% csrf_token %}
+                            <input type="image" src="{% static 'icons/circle-stop-solid.svg' %}" alt="Aufnahme Stoppen" height="200" width="200"  value="Aufnahme Stoppen" />
+                        </form>
+                    {% endif %}
                 
-                {% elif recording_active.state == 4 %}<!-- PLAYING -->
-                <h1>Abspielen Stoppen</h1>
-                <form method="POST" action="stoprecording/">
-                    {% csrf_token %}
-                    <input type="image" src="{% static 'icons/circle-stop-solid.svg' %}" alt="abspielen Stoppen" height="200" width="200"  value="Aufnahme Stoppen" />
-                </form>
+                {% elif recording_active.state == 4 %}
+                    <h3>Abspielen Stoppen</h3>
+                    <form method="POST" action="stoprecording/">
+                        {% csrf_token %}
+                        <input type="image" src="{% static 'icons/circle-stop-solid.svg' %}" alt="abspielen Stoppen" height="200" width="200"  value="Aufnahme Stoppen" />
+                    </form>
 
                 {% else %}
-                <form method="POST" action="startrecording/">
-                    {% csrf_token %}
-                    <input type="image" src="{% static 'icons/compact-disc-solid.svg' %}" alt="Aufnahme Starten" height="200" width="200" value="Aufnahme Starten" />
-                </form>
+                    <form method="POST" action="startrecording/">
+                        {% csrf_token %}
+                        <input type="image" src="{% static 'icons/compact-disc-solid.svg' %}" alt="Aufnahme Starten" height="200" width="200" value="Aufnahme Starten" />
+                    </form>
                 {% endif %}
             </td>
 
-            <td>
+            <td height="300" width="200">
                 <!-- Playback Feld -->
-                {% if recording_active.state == 3 %}<!-- STOPPED -->
-                <h1>Aufnahme abspielen</h1>
-                <form method="POST" action="playrecording/">
-                    {% csrf_token %}
-                    <input type="image" src="{% static 'icons/circle-play-solid.svg' %}" alt="Abspielen" height="200" width="200"  value="Aufnahme Abspielen" />
-                </form>
+                {% if recording_active.state == 4 %}<!-- PLAYING -->
+                    <h3>Aufnahme Pausieren</h3>
+                    <form method="POST" action="pauserecording/">
+                        {% csrf_token %}
+                        <input type="image" src="{% static 'icons/circle-pause-solid.svg' %}" alt="Abspielen" height="200" width="200"  value="Aufnahme Abspielen" />
+                    </form>
 
-                {% elif recording_active.state == 4 %}<!-- PLAYING -->
-                <h1>Aufnahme Pausieren</h1>
-                <form method="POST" action="pauserecording/">
-                    {% csrf_token %}
-                    <input type="image" src="{% static 'icons/circle-pause-solid.svg' %}" alt="Abspielen" height="200" width="200"  value="Aufnahme Abspielen" />
-                </form>
+                {% else %}
+                    <h3>Aufnahme abspielen</h3>
+                    <form method="POST" action="playrecording/">
+                        {% csrf_token %}
+                        <input type="image" src="{% static 'icons/circle-play-solid.svg' %}" alt="Abspielen" height="200" width="200"  value="Aufnahme Abspielen" />
+                    </form>
                 {% endif %}
             </td>
         </tr>
