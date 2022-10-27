@@ -11,6 +11,7 @@
     <table>
         <tr>
             <td>
+                <!-- Aufnahme Feld -->
                 {% if recording_active %}
                 {% if recording_active.state == 0 %}<!-- NEW -->
                 <h1>Aufnahme wird gestartet</h1>
@@ -23,7 +24,14 @@
                 {% elif recording_active.state == 2 %}<!-- STOP -->
                 <h1>Aufnahme wird beendet</h1>
                 {% endif %}
-            
+                
+                {% elif recording_active.state == 4 %}<!-- PLAYING -->
+                <h1>Abspielen Stoppen</h1>
+                <form method="POST" action="stoprecording/">
+                    {% csrf_token %}
+                    <input type="image" src="/icons/circle-stop-solid.svg" alt="abspielen Stoppen" height="200" width="200"  value="Aufnahme Stoppen" />
+                </form>
+
                 {% else %}
                 <form method="POST" action="startrecording/">
                     {% csrf_token %}
@@ -31,12 +39,23 @@
                 </form>
                 {% endif %}
             </td>
+
             <td>
+                <!-- Playback Feld -->
+                {% if recording_active.state == 3 %}<!-- STOPPED -->
                 <h1>Aufnahme abspielen</h1>
                 <form method="POST" action="playrecording/">
                     {% csrf_token %}
                     <input type="image" src="/icons/circle-play-solid.svg" alt="Abspielen" height="200" width="200"  value="Aufnahme Abspielen" />
                 </form>
+
+                {% elseif recording_active.state == 4 %}<!-- PLAYING -->
+                <h1>Aufnahme Pausieren</h1>
+                <form method="POST" action="pauserecording/">
+                    {% csrf_token %}
+                    <input type="image" src="/icons/circle-pause-solid.svg" alt="Abspielen" height="200" width="200"  value="Aufnahme Abspielen" />
+                </form>
+
             </td>
         </tr>
     </table>
