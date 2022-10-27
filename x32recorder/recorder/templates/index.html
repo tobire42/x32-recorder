@@ -15,7 +15,7 @@
     <h1>Aufnahme läuft</h1>
     <form method="POST" action="stoprecording/">
         {% csrf_token %}
-        <input type="submit" value="Aufnahme Stoppen" />
+        <input type="image" src="/home/datendenker/dev/x32-recorder/x32recorder/recorder/icons/circle-stop-solid.svg" alt="Aufnahme Stoppen" height="200" width="200"  value="Aufnahme Stoppen" />
     </form>
     {% elif recording_active.state == 2 %}<!-- STOP -->
     <h1>Aufnahme wird beendet</h1>
@@ -24,7 +24,7 @@
     {% else %}
     <form method="POST" action="startrecording/">
         {% csrf_token %}
-        <input type="submit" value="Aufnahme Starten" />
+        <input type="image" src="icons/compact-disc-solid.svg" alt="Aufnahme Starten" height="200" width="200" value="Aufnahme Starten" />
     </form>
     {% endif %}
 
