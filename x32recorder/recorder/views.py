@@ -1,6 +1,8 @@
+import datetime
 from django.shortcuts import render, redirect
 
 from .models import Recording
+
 
 
 def index(request):
@@ -18,7 +20,8 @@ def index(request):
 
 
 def startrecording(request):
-    rec = Recording(channel_count=2, filename="new.wav")
+    filename = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".wav"
+    rec = Recording(channel_count=2, filename=filename)
     rec.save()
     return redirect(index)
 

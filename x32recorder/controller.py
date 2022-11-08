@@ -3,10 +3,15 @@ import time
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "x32recorder.settings")
 import django
+import subprocess
 
 django.setup()
 
 from recorder.models import Recording
+
+CHANNEL_COUNT = 4
+RECORDING_PATH = "/home/pi/recordings/"
+AUDIODEV = "hw:2"
 
 
 while True:
@@ -19,6 +24,16 @@ while True:
 
     # Start actual recording here
     print("Starting recording")
+    process = subprocess.Popen(
+        [
+            "rec",
+            "-q", "--buffer", "1048576", "-b", "24",
+            "-c", str(CHANNEL_COUNT),
+            recording.filename
+        ],
+        cwd=RECORDING_PATH,
+        env={"AUDIODEV": AUDIODEV}
+    )
 
     recording.state = Recording.RECORD
     recording.save()
@@ -31,6 +46,8 @@ while True:
 
     # Stop recording here
     print("Stopping recording")
+    process.terminate()
+    process.wait()
 
     recording.state = Recording.STOPPED
     recording.save()
