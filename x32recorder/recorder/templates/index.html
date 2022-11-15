@@ -7,6 +7,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>X32 Recorder</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% if recording_active.state == 0 or recording_active.state == 2 %}
+    <script>
+        window.setTimeout(function() {
+            window.location.reload()
+        }, 1000);
+    </script>
+    {% endif %}
 </head>
 <body>
     <h1>X32 Recorder</h1>
