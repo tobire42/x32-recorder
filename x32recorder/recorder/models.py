@@ -26,3 +26,23 @@ class Recording(models.Model):
 
     def __str__(self) -> str:
         return f"Recorded on {self.date} - {self.duration}"
+
+
+class RecordingTemplate(models.Model):
+    name = models.CharField(max_length=256)
+    channel_count = models.IntegerField()
+
+
+class RecordingTemplateChannel(models.Model):
+    template = models.ForeignKey(
+        "RecordingTemplate", related_name="channels", on_delete=models.CASCADE
+    )
+    channel_no = models.IntegerField()
+    name = models.CharField(max_length=256)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["template", "channel_no"], name="channel_no_unique_in_template"
+            )
+        ]
