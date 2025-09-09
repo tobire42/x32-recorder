@@ -131,7 +131,8 @@ def audiodevice_list(request):
             if device['max_input_channels'] > 0:  # Only input devices
                 device_list.append({
                     'name': device['name'],
-                    'identifier': f"sounddevice:{i}"
+                    'identifier': f"sounddevice:{i}",
+                    'input_channel_count': device['max_input_channels']
                 })
         
         return Response(device_list)
