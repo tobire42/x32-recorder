@@ -42,6 +42,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -116,6 +117,22 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = "static/"
+
+# WhiteNoise static files configuration
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Use ManifestStaticFilesStorage in production, fallback to default in development
+import os
+if os.path.exists(BASE_DIR / "staticfiles"):
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+else:
+    # Fallback for development or when staticfiles haven't been collected yet
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+
+# WhiteNoise configuration
+WHITENOISE_USE_FINDERS = True  # Allows serving from source directories when staticfiles not collected
+WHITENOISE_AUTOREFRESH = True  # Auto-refresh in development
+WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br']
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field

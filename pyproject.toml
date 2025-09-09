@@ -10,6 +10,7 @@ dependencies = [
     "gunicorn>=20.1.0",
     "numpy>=1.24.4",
     "sounddevice>=0.5.2",
+    "whitenoise>=6.7.0",
 ]
 requires-python = ">=3.8"
 

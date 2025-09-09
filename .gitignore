@@ -130,3 +130,5 @@ dmypy.json
 
 nohup.out
 *.pid
+
+x32recorder/staticfiles/

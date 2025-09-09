@@ -72,6 +72,11 @@ x32recorder/
    uv run python x32recorder/manage.py createsuperuser
    ```
 
+5. **Static Files sammeln (für Produktion)**
+   ```bash
+   uv run python x32recorder/manage.py collectstatic --noinput
+   ```
+
 ## 🎛️ Konfiguration
 
 ### Audio-Setup
@@ -116,6 +121,8 @@ uv run gunicorn --chdir x32recorder \
     --error-logfile - \
     x32recorder.wsgi:application
 ```
+
+**Hinweis**: Static Files werden automatisch von WhiteNoise bereitgestellt. Bei Änderungen an CSS/JS-Dateien muss `collectstatic` erneut ausgeführt werden.
 
 Zugriff unter: [http://localhost:8000](http://localhost:8000)
 
@@ -223,6 +230,12 @@ uv run python x32recorder/manage.py test
 ### Django-Probleme
 - Datenbank-Migrationen: `python manage.py migrate`
 - Static Files: `python manage.py collectstatic`
+- Static Files nicht sichtbar: Prüfen ob WhiteNoise korrekt konfiguriert ist
+
+### Static Files Probleme
+- Static Files sammeln: `uv run python x32recorder/manage.py collectstatic --noinput`
+- Cache leeren: Browser-Cache oder `collectstatic --clear`
+- WhiteNoise-Konfiguration in `settings.py` prüfen
 
 ## 📝 Lizenz
 
