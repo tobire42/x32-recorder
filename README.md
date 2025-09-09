@@ -1,15 +1,18 @@
 # X32 Recorder
 
-**X32 Recorder** ist eine Django-basierte Webanwendung zur Steuerung und Verwaltung von Mehrkanal-Audioaufnahmen. Das System wurde ursprünglich für das Behringer X32 Mischpult entwickelt, funktioniert aber mit jedem ALSA-kompatiblen Audio-Interface.
+**X32 Recorder** ist eine Django-basierte Webanwendung zur Steuerung und Verwaltung von Mehrkanal-Audioaufnahmen. Das System wurde ursprünglich für das Behringer X32 Mischpult entwickelt, funktioniert aber mit jedem sounddevice-kompatiblen Audio-Interface auf **Windows, macOS und Linux**.
 
 ## 🎯 Features
 
+- **Cross-Platform**: Läuft auf Windows, macOS und Linux
 - **Web-Interface**: Intuitive Bedienung zum Starten und Stoppen von Aufnahmen
+- **REST API**: Vollständige API für alle Funktionen
 - **Mehrkanal-Aufnahme**: Unterstützung für Mehrkanal-Audio-Aufnahmen
 - **Recording-Management**: Übersicht und Verwaltung aller vergangenen Aufnahmen
 - **Template-System**: Aufnahme-Templates mit konfigurierbaren Kanälen
 - **Echtzeitsteuerung**: Separates Controller-Skript für die Hardware-Anbindung
 - **Flexible Konfiguration**: Anpassbare Kanalzahl und Audio-Device-Einstellungen
+- **Produktions-ready**: Waitress WSGI Server für stabile Deployments
 
 ## 🏗️ Architektur
 
@@ -46,8 +49,11 @@ x32recorder/
 
 - **Python 3.8-3.11**
 - **uv** (Dependency Management) - Install with: `curl -LsSf https://astral.sh/uv/install.sh | sh`
-- **PortAudio** (für sounddevice) - Install with: `sudo apt-get install portaudio19-dev` (Ubuntu/Debian)
-- Audio-Interface mit sounddevice-Unterstützung
+- **PortAudio** (für sounddevice):
+  - **Ubuntu/Debian**: `sudo apt-get install portaudio19-dev`
+  - **Windows**: Automatisch mit sounddevice installiert
+  - **macOS**: `brew install portaudio`
+- Audio-Interface mit sounddevice-Unterstützung (cross-platform)
 
 ### Setup
 
@@ -108,18 +114,13 @@ uv run python x32recorder/controller.py
 uv run python x32recorder/manage.py runserver
 ```
 
-#### Produktionsserver mit Gunicorn
+#### Produktionsserver mit Waitress (Cross-platform)
 ```bash
 # Einfacher Start
-uv run gunicorn --chdir x32recorder x32recorder.wsgi:application
+uv run waitress-serve --host=0.0.0.0 --port=8000 --chdir=x32recorder x32recorder.wsgi:application
 
-# Mit Konfiguration für Produktion
-uv run gunicorn --chdir x32recorder \
-    --bind 0.0.0.0:8000 \
-    --workers 3 \
-    --access-logfile - \
-    --error-logfile - \
-    x32recorder.wsgi:application
+# Mit mehr Threads für bessere Performance
+uv run waitress-serve --host=0.0.0.0 --port=8000 --threads=6 --chdir=x32recorder x32recorder.wsgi:application
 ```
 
 **Hinweis**: Static Files werden automatisch von WhiteNoise bereitgestellt. Bei Änderungen an CSS/JS-Dateien muss `collectstatic` erneut ausgeführt werden.
@@ -134,19 +135,47 @@ Zugriff unter: [http://localhost:8000](http://localhost:8000)
 uv run python x32recorder/controller.py
 ```
 
-### 3. Automatisiertes Management (Empfohlen)
+### 3. Cross-Platform Service Management (Empfohlen)
 
-Verwenden Sie das `manage_services.sh` Skript für einfaches Starten und Stoppen beider Services:
+Verwenden Sie das neue `manage_services.py` Skript für einfaches Starten und Stoppen beider Services auf allen Plattformen:
 
+#### Linux/macOS:
 ```bash
 # Beide Services im Hintergrund starten
-./manage_services.sh start
+python manage_services.py start
 
 # Status der Services prüfen
-./manage_services.sh status
+python manage_services.py status
 
 # Beide Services stoppen
-./manage_services.sh stop
+python manage_services.py stop
+
+# Services neustarten
+python manage_services.py restart
+
+# Logs anzeigen
+python manage_services.py logs
+```
+
+#### Windows:
+```cmd
+# Beide Services im Hintergrund starten
+manage_services.bat start
+
+# Status der Services prüfen
+manage_services.bat status
+
+# Beide Services stoppen
+manage_services.bat stop
+
+# Services neustarten
+manage_services.bat restart
+
+# Logs anzeigen
+manage_services.bat logs
+```
+
+**Hinweis**: Das neue Service-Management verwendet Waitress statt Gunicorn für bessere Windows-Kompatibilität.
 
 # Services neustarten
 ./manage_services.sh restart
@@ -256,6 +285,6 @@ Beiträge sind willkommen! Bitte:
 ## ⚠️ Hinweise
 
 - Das Projekt befindet sich in aktiver Entwicklung
-- Getestet auf Linux-Systemen mit ALSA
-- Für Produktionsumgebungen `gunicorn` verwenden
-- Das `manage_services.sh` Skript vereinfacht das Management beider Services
+- Getestet auf Linux-Systemen, Windows-Kompatibilität durch Waitress und sounddevice
+- Für Produktionsumgebungen `waitress` verwenden (cross-platform)
+- Das neue `manage_services.py` Skript funktioniert auf allen Plattformen (Linux, macOS, Windows)
