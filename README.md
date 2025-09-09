@@ -46,9 +46,8 @@ x32recorder/
 
 - **Python 3.8-3.11**
 - **uv** (Dependency Management) - Install with: `curl -LsSf https://astral.sh/uv/install.sh | sh`
-- **SoX** (`rec`-Befehl) für Audio-Aufnahmen
-- **ALSA** (Linux Audio-System)
-- Audio-Interface mit ALSA-Unterstützung
+- **PortAudio** (für sounddevice) - Install with: `sudo apt-get install portaudio19-dev` (Ubuntu/Debian)
+- Audio-Interface mit sounddevice-Unterstützung
 
 ### Setup
 
@@ -82,17 +81,17 @@ Bearbeiten Sie `x32recorder/controller.py` für Ihre Hardware-Konfiguration:
 ```python
 CHANNEL_COUNT = 4                        # Anzahl Kanäle
 RECORDING_PATH = "/home/pi/recordings/"  # Aufnahme-Verzeichnis  
-AUDIODEV = "hw:2"                        # ALSA-Device
+AUDIODEV = "hw:2"                        # Audio-Device Name oder Index
 ```
 
-### ALSA-Device ermitteln
+### Audio-Device ermitteln
 
 ```bash
-# Verfügbare Audio-Devices anzeigen
-arecord -l
+# Verfügbare Audio-Devices anzeigen (mit sounddevice)
+uv run python -c "import sounddevice; print(sounddevice.query_devices())"
 
-# Test-Aufnahme
-arecord -D hw:2 -c 4 -f S24_LE test.wav
+# Oder direkt im Controller starten um Devices zu sehen
+uv run python x32recorder/controller.py
 ```
 
 ## 🎵 Verwendung
@@ -217,9 +216,9 @@ uv run python x32recorder/manage.py test
 ## 🐛 Troubleshooting
 
 ### Audio-Probleme
-- ALSA-Device mit `arecord -l` prüfen
-- Berechtigungen für Audio-Hardware prüfen
-- SoX-Installation überprüfen: `rec --version`
+- Audio-Device mit `uv run python -c "import sounddevice; print(sounddevice.query_devices())"` prüfen
+- PortAudio-Installation überprüfen: `sudo apt-get install portaudio19-dev` (Ubuntu/Debian)
+- sounddevice-Installation: `uv add sounddevice`
 
 ### Django-Probleme
 - Datenbank-Migrationen: `python manage.py migrate`
