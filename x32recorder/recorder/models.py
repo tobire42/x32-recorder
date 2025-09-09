@@ -12,7 +12,7 @@ class Recording(models.Model):
 
     date = models.DateTimeField(auto_now_add=True)
     filename = models.CharField(max_length=256)
-    channel_count = models.IntegerField()
+    channels = models.JSONField(default=list, help_text="List of integer channel numbers")
     duration = models.DurationField(default=None, blank=True, null=True)
     state = models.IntegerField(default=NEW)
 
@@ -23,6 +23,11 @@ class Recording(models.Model):
             return active_recordings.get()
         except cls.DoesNotExist:
             return None
+
+    @property
+    def channel_count(self):
+        """Backward compatibility property to get the number of channels"""
+        return len(self.channels) if self.channels else 0
 
     def __str__(self) -> str:
         return f"Recorded on {self.date} - {self.duration}"

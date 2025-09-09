@@ -4,6 +4,7 @@ from .models import Recording, RecordingTemplate, RecordingTemplateChannel
 
 class RecordingSerializer(serializers.HyperlinkedModelSerializer):
     """Serializer for Recording model with all fields and hyperlinked URLs"""
+    channel_count = serializers.ReadOnlyField()  # Computed property for backward compatibility
     
     class Meta:
         model = Recording
@@ -12,11 +13,12 @@ class RecordingSerializer(serializers.HyperlinkedModelSerializer):
             'id',
             'date',
             'filename',
+            'channels',
             'channel_count',
             'duration',
             'state',
         ]
-        read_only_fields = ['id', 'date']
+        read_only_fields = ['id', 'date', 'channel_count']
 
 
 class RecordingTemplateChannelSerializer(serializers.HyperlinkedModelSerializer):

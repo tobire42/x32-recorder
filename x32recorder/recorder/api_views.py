@@ -33,11 +33,26 @@ class RecordingViewSet(viewsets.ModelViewSet):
         
         # Create new recording
         filename = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".wav"
-        channel_count = request.data.get('channel_count', 2)
+        channels = request.data.get('channels', [1, 2])  # Default to channels 1 and 2
+        
+        # Ensure channels is a list of integers
+        if not isinstance(channels, list):
+            return Response(
+                {'error': 'channels must be a list of integers'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            channels = [int(ch) for ch in channels]
+        except (ValueError, TypeError):
+            return Response(
+                {'error': 'All channel values must be integers'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         recording = Recording.objects.create(
             filename=filename,
-            channel_count=channel_count,
+            channels=channels,
             state=Recording.NEW
         )
         

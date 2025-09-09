@@ -21,7 +21,7 @@ def index(request):
 
 def startrecording(request):
     filename = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".wav"
-    rec = Recording(channel_count=2, filename=filename)
+    rec = Recording(channels=[1, 2], filename=filename)  # Default to channels 1 and 2
     rec.save()
     return redirect(index)
 
