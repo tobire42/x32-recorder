@@ -11,8 +11,7 @@ from .serializers import (
 )
 import datetime
 import sounddevice as sd
-import threading
-import time
+from pprint import pprint
 
 
 class RecordingViewSet(viewsets.ModelViewSet):
@@ -117,16 +116,61 @@ def audiodevice_list(request):
     """List available audio devices"""
     try:
         devices = sd.query_devices()
-        device_list = []
+        hostapis = sd.query_hostapis()
+        device_dict = {}
         
-        for i, device in enumerate(devices):
+        for device in devices:
             if device['max_input_channels'] > 0:  # Only input devices
-                device_list.append({
-                    'name': device['name'],
-                    'identifier': f"sounddevice:{i}",
-                    'input_channel_count': device['max_input_channels'],
-                    'index': device['index']
-                })
+                device_index = device['index']
+                device_name = device['name']
+                hostapi_index = device['hostapi']
+                hostapi_name = hostapis[hostapi_index]['name']
+                
+                # Normalize device name for comparison (remove extra spaces, parentheses variations)
+                base_name = device_name.split('(')[0].strip()
+                
+                # Create a unique key based on the base name
+                # Prefer ASIO > WDM-KS > WASAPI > DirectSound > MME
+                # ASIO is best for professional audio interfaces, WASAPI for consumer devices
+                priority = {
+                    'ASIO': 0,
+                    'Windows WDM-KS': 1,
+                    'WASAPI': 2,
+                    'Windows WASAPI': 2,
+                    'Windows DirectSound': 3,
+                    'MME': 4
+                }
+                current_priority = priority.get(hostapi_name, 99)
+                
+                if base_name not in device_dict:
+                    device_dict[base_name] = {
+                        'name': f"{device_name} [{hostapi_name}]",
+                        'identifier': f"sounddevice:{device_index}",
+                        'input_channel_count': device['max_input_channels'],
+                        'index': device_index,
+                        'hostapi': hostapi_name,
+                        'priority': current_priority
+                    }
+                else:
+                    # Replace with lower priority number (better API)
+                    if current_priority < device_dict[base_name]['priority']:
+                        device_dict[base_name] = {
+                            'name': f"{device_name} [{hostapi_name}]",
+                            'identifier': f"sounddevice:{device_index}",
+                            'input_channel_count': device['max_input_channels'],
+                            'index': device_index,
+                            'hostapi': hostapi_name,
+                            'priority': current_priority
+                        }
+        
+        # Convert dict to list and remove priority field
+        device_list = []
+        for device_data in device_dict.values():
+            device_data.pop('priority', None)
+            device_list.append(device_data)
+        
+        # Sort by name
+        device_list.sort(key=lambda x: x['name'])
         
         return Response(device_list)
     except Exception as e:
