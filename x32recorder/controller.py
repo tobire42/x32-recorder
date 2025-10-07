@@ -43,7 +43,7 @@ class MultiChannelRecorder:
         print(f"Using {self.channels} input channels from device {device_info['name']}")
 
         sd.check_input_settings(
-            device=self.audevice_index,
+            device=self.audiodevice_index,
             channels=device_channels,
             samplerate=self.sample_rate,
             dtype=np.float32
@@ -185,7 +185,6 @@ def main():
     list_audio_devices()
     
     recorder = MultiChannelRecorder(
-        device=AUDIODEV,
         sample_rate=SAMPLE_RATE,
         recording_path=RECORDING_PATH
     )
