@@ -132,3 +132,5 @@ nohup.out
 *.pid
 
 x32recorder/staticfiles/
+
+x32recorder/recordings/

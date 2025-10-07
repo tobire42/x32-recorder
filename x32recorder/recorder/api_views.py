@@ -26,61 +26,6 @@ class RecordingViewSet(viewsets.ModelViewSet):
     def hello(self, request):
         return Response({"message": "Hello, this is the Recording API!"})
 
-    @action(detail=False, methods=['post'])
-    def start(self, request):
-        """Start a new recording"""
-        # Check if there's already an active recording
-        if Recording.get_active():
-            return Response(
-                {'error': 'There is already an active recording'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Create new recording
-        filename = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".wav"
-        channels = request.data.get('channels', [1, 2])  # Default to channels 1 and 2
-        
-        # Ensure channels is a list of integers
-        if not isinstance(channels, list):
-            return Response(
-                {'error': 'channels must be a list of integers'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        try:
-            channels = [int(ch) for ch in channels]
-        except (ValueError, TypeError):
-            return Response(
-                {'error': 'All channel values must be integers'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        recording = Recording.objects.create(
-            filename=filename,
-            channels=channels,
-            state=Recording.NEW
-        )
-        
-        serializer = self.get_serializer(recording)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
-    @action(detail=True, methods=['post'])
-    def stop(self, request, pk=None):
-        """Stop a specific recording"""
-        recording = self.get_object()
-        
-        if recording.state not in [Recording.NEW, Recording.RECORD]:
-            return Response(
-                {'error': 'Recording is not active'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        recording.state = Recording.STOP
-        recording.save()
-        
-        serializer = self.get_serializer(recording)
-        return Response(serializer.data)
-
 
 class RecordingTemplateViewSet(viewsets.ModelViewSet):
     """
@@ -132,7 +77,8 @@ def audiodevice_list(request):
                 device_list.append({
                     'name': device['name'],
                     'identifier': f"sounddevice:{i}",
-                    'input_channel_count': device['max_input_channels']
+                    'input_channel_count': device['max_input_channels'],
+                    'index': device['index']
                 })
         
         return Response(device_list)
