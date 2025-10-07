@@ -45,7 +45,6 @@ class RecordingTemplateChannel(models.Model):
     )
     channel_no = models.IntegerField()
     name = models.CharField(max_length=256)
-    stereo = models.BooleanField(default=False)
 
     class Meta:
         constraints = [

@@ -209,7 +209,6 @@ Das Skript erstellt PID-Dateien in `./pids/` und Log-Dateien in `./logs/`.
 - `template`: Zugehöriges Template
 - `channel_no`: Kanalnummer
 - `name`: Kanalbezeichnung
-- `stereo`: Stereo-Flag
 
 ## 🔧 Admin-Interface
 

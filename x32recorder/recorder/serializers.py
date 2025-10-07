@@ -32,7 +32,6 @@ class RecordingTemplateChannelSerializer(serializers.HyperlinkedModelSerializer)
             'template',
             'channel_no',
             'name',
-            'stereo',
         ]
         read_only_fields = ['id']
 

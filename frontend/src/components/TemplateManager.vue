@@ -64,7 +64,6 @@
             <div v-if="template.channels && template.channels.length" class="channels-list">
               <div v-for="channel in template.channels" :key="channel.id" class="channel-tag">
                 Ch {{ channel.channel_no }}: {{ channel.name }}
-                <span v-if="channel.stereo" class="stereo-badge">Stereo</span>
               </div>
             </div>
           </div>
@@ -110,7 +109,7 @@
           </div>
 
           <div v-if="selectedChannels.length > 0" class="form-group">
-            <label class="label">Channel Names & Configuration</label>
+            <label class="label">Channel Names</label>
             <div class="channels-config">
               <div
                 v-for="ch in sortedSelectedChannels"
@@ -124,13 +123,6 @@
                   class="input input-small"
                   :placeholder="`Channel ${ch}`"
                 />
-                <label class="checkbox-label">
-                  <input
-                    v-model="channelStereo[ch]"
-                    type="checkbox"
-                  />
-                  Stereo
-                </label>
               </div>
             </div>
           </div>
@@ -189,7 +181,6 @@ export default {
 
     const selectedChannels = ref([])
     const channelNames = ref({})
-    const channelStereo = ref({})
 
     const sortedSelectedChannels = computed(() => {
       return [...selectedChannels.value].sort((a, b) => a - b)
@@ -201,7 +192,6 @@ export default {
         selectedChannels.value.splice(index, 1)
         // Clean up the channel config when deselected
         delete channelNames.value[channel]
-        delete channelStereo.value[channel]
       } else {
         selectedChannels.value.push(channel)
       }
@@ -212,7 +202,6 @@ export default {
       templateForm.channel_count = 0
       selectedChannels.value = []
       channelNames.value = {}
-      channelStereo.value = {}
       editingTemplate.value = null
     }
 
@@ -226,12 +215,10 @@ export default {
         const channels = await apiService.getTemplateChannels(template.id)
         selectedChannels.value = []
         channelNames.value = {}
-        channelStereo.value = {}
 
         channels.forEach(channel => {
           selectedChannels.value.push(channel.channel_no)
           channelNames.value[channel.channel_no] = channel.name
-          channelStereo.value[channel.channel_no] = channel.stereo
         })
       } catch (error) {
         console.error('Failed to load channel details:', error)
@@ -280,8 +267,7 @@ export default {
           await apiService.createTemplateChannel({
             template: template.url,
             channel_no: channelNo,
-            name: channelNames.value[channelNo] || `Channel ${channelNo}`,
-            stereo: channelStereo.value[channelNo] || false
+            name: channelNames.value[channelNo] || `Channel ${channelNo}`
           })
         }
 
@@ -325,7 +311,6 @@ export default {
       selectedChannels,
       sortedSelectedChannels,
       channelNames,
-      channelStereo,
       toggleChannelSelection,
       editTemplate,
       closeModal,
@@ -553,18 +538,6 @@ export default {
   border-radius: 6px;
   font-size: 0.75rem;
   color: #4a5568;
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-}
-
-.stereo-badge {
-  padding: 0.125rem 0.375rem;
-  background: #667eea;
-  color: white;
-  border-radius: 4px;
-  font-size: 0.625rem;
-  font-weight: 600;
 }
 
 .modal-overlay {
@@ -700,7 +673,7 @@ export default {
 
 .channel-config-item {
   display: grid;
-  grid-template-columns: 50px 1fr auto;
+  grid-template-columns: 50px 1fr;
   align-items: center;
   gap: 0.75rem;
 }
@@ -709,20 +682,6 @@ export default {
   font-weight: 600;
   font-size: 0.875rem;
   color: #4a5568;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.875rem;
-  color: #4a5568;
-  cursor: pointer;
-  user-select: none;
-}
-
-.checkbox-label input[type="checkbox"] {
-  cursor: pointer;
 }
 
 .modal-actions {
