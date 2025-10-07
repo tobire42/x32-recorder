@@ -28,12 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 
-# CORS Configuration
-# Allow requests from the frontend during development
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Vite default dev server
-    "http://127.0.0.1:5173",
-]
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Allow credentials (cookies, authorization headers, etc.)
 CORS_ALLOW_CREDENTIALS = True
