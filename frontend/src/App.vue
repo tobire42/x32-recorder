@@ -18,10 +18,19 @@
           {{ error }}
         </div>
 
+        <TemplateManager
+          :templates="templates"
+          :loading="loadingTemplates"
+          @refresh="fetchTemplates"
+          @select-template="selectTemplate"
+        />
+
         <RecordingControls 
           :audioDevices="audioDevices"
           :isRecording="isRecording"
           :activeRecording="activeRecording"
+          :templates="templates"
+          :selectedTemplate="selectedTemplate"
           @start-recording="startRecording"
           @stop-recording="stopRecording"
           @refresh-devices="fetchAudioDevices"
@@ -47,20 +56,25 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import RecordingControls from './components/RecordingControls.vue'
 import RecordingsList from './components/RecordingsList.vue'
+import TemplateManager from './components/TemplateManager.vue'
 import apiService from './services/apiService'
 
 export default {
   name: 'App',
   components: {
     RecordingControls,
-    RecordingsList
+    RecordingsList,
+    TemplateManager
   },
   setup() {
     const audioDevices = ref([])
     const recordings = ref([])
+    const templates = ref([])
     const activeRecording = ref(null)
+    const selectedTemplate = ref(null)
     const isRecording = ref(false)
-    const loadingRecordings = ref(false)
+    const loadingRecordings = ref(true)
+    const loadingTemplates = ref(false)
     const error = ref(null)
     let pollInterval = null
 
@@ -73,9 +87,28 @@ export default {
       }
     }
 
+    const fetchTemplates = async () => {
+      try {
+        loadingTemplates.value = true
+        error.value = null
+        templates.value = await apiService.getTemplates()
+      } catch (err) {
+        error.value = `Failed to fetch templates: ${err.message}`
+      } finally {
+        loadingTemplates.value = false
+      }
+    }
+
+    const selectTemplate = (template) => {
+      selectedTemplate.value = template
+      // Scroll to recording controls
+      setTimeout(() => {
+        selectedTemplate.value = null // Reset after applying
+      }, 100)
+    }
+
     const fetchRecordings = async () => {
       try {
-        loadingRecordings.value = true
         error.value = null
         recordings.value = await apiService.getRecordings()
         
@@ -133,6 +166,7 @@ export default {
 
     onMounted(() => {
       fetchAudioDevices()
+      fetchTemplates()
       fetchRecordings()
       startPolling()
     })
@@ -144,12 +178,17 @@ export default {
     return {
       audioDevices,
       recordings,
+      templates,
       activeRecording,
+      selectedTemplate,
       isRecording,
       loadingRecordings,
+      loadingTemplates,
       error,
       fetchAudioDevices,
+      fetchTemplates,
       fetchRecordings,
+      selectTemplate,
       startRecording,
       stopRecording
     }

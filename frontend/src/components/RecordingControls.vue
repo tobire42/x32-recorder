@@ -4,6 +4,29 @@
       <h2 class="card-title">Recording Controls</h2>
       
       <div v-if="!isRecording" class="form">
+        <!-- Template Selection -->
+        <div v-if="templates && templates.length > 0" class="form-group">
+          <label for="template" class="label">Recording Template (Optional)</label>
+          <select
+            id="template"
+            v-model="selectedTemplateId"
+            class="select"
+            @change="applyTemplate"
+          >
+            <option :value="null">-- No Template --</option>
+            <option
+              v-for="template in templates"
+              :key="template.id"
+              :value="template.id"
+            >
+              {{ template.name }} ({{ template.channel_count }} channels)
+            </option>
+          </select>
+          <p v-if="selectedTemplateId" class="help-text">
+            Template applied - you can still modify channels below
+          </p>
+        </div>
+
         <!-- Filename Input -->
         <div class="form-group">
           <label for="filename" class="label">Filename</label>
@@ -105,6 +128,7 @@
 
 <script>
 import { ref, computed, watch } from 'vue'
+import apiService from '../services/apiService'
 
 export default {
   name: 'RecordingControls',
@@ -120,6 +144,14 @@ export default {
     activeRecording: {
       type: Object,
       default: null
+    },
+    templates: {
+      type: Array,
+      default: () => []
+    },
+    selectedTemplate: {
+      type: Object,
+      default: null
     }
   },
   emits: ['start-recording', 'stop-recording', 'refresh-devices'],
@@ -127,6 +159,7 @@ export default {
     const filename = ref('')
     const selectedDevice = ref(null)
     const selectedChannels = ref([1, 2])
+    const selectedTemplateId = ref(null)
 
     // Auto-select first device when devices load
     watch(() => props.audioDevices, (devices) => {
@@ -134,6 +167,14 @@ export default {
         selectedDevice.value = devices[0].index
       }
     }, { immediate: true })
+
+    // Watch for external template selection (from TemplateManager)
+    watch(() => props.selectedTemplate, (template) => {
+      if (template) {
+        selectedTemplateId.value = template.id
+        applyTemplate()
+      }
+    })
 
     const availableChannels = computed(() => {
       const device = props.audioDevices.find(d => d.index === selectedDevice.value)
@@ -143,8 +184,37 @@ export default {
 
     // Reset channel selection when device changes
     watch(selectedDevice, () => {
-      selectedChannels.value = [1, 2]
+      // Only reset if no template is selected
+      if (!selectedTemplateId.value) {
+        selectedChannels.value = [1, 2]
+      }
     })
+
+    const applyTemplate = async () => {
+      if (!selectedTemplateId.value) {
+        selectedChannels.value = [1, 2]
+        return
+      }
+
+      const template = props.templates.find(t => t.id === selectedTemplateId.value)
+      if (!template) return
+
+      try {
+        // Load template channels
+        const channels = await apiService.getTemplateChannels(template.id)
+        console.log('Loaded template channels:', channels)
+        
+        // Set selected channels based on template
+        const channelNumbers = channels.map(ch => ch.channel_no)
+        console.log('Setting channel numbers:', channelNumbers)
+        
+        // Force reactivity update by creating new array
+        selectedChannels.value = [...channelNumbers.sort((a, b) => a - b)]
+        console.log('Selected channels updated to:', selectedChannels.value)
+      } catch (error) {
+        console.error('Failed to load template channels:', error)
+      }
+    }
 
     const toggleChannel = (channel) => {
       const index = selectedChannels.value.indexOf(channel)
@@ -171,6 +241,9 @@ export default {
       }
 
       emit('start-recording', recordingData)
+      
+      // Reset template selection after starting
+      selectedTemplateId.value = null
     }
 
     const handleStop = () => {
@@ -198,7 +271,9 @@ export default {
       filename,
       selectedDevice,
       selectedChannels,
+      selectedTemplateId,
       availableChannels,
+      applyTemplate,
       toggleChannel,
       handleStart,
       handleStop,

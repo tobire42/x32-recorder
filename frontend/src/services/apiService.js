@@ -46,6 +46,60 @@ const apiService = {
     const response = await apiClient.delete(`/recordings/${id}/`)
     return response.data
   },
+
+  // Get all recording templates
+  async getTemplates() {
+    const response = await apiClient.get('/templates/')
+    return response.data.results || response.data
+  },
+
+  // Get a specific template
+  async getTemplate(id) {
+    const response = await apiClient.get(`/templates/${id}/`)
+    return response.data
+  },
+
+  // Create a new template
+  async createTemplate(data) {
+    const response = await apiClient.post('/templates/', data)
+    return response.data
+  },
+
+  // Update a template
+  async updateTemplate(id, data) {
+    const response = await apiClient.put(`/templates/${id}/`, data)
+    return response.data
+  },
+
+  // Delete a template
+  async deleteTemplate(id) {
+    const response = await apiClient.delete(`/templates/${id}/`)
+    return response.data
+  },
+
+  // Get template channels
+  async getTemplateChannels(templateId) {
+    const response = await apiClient.get(`/template-channels/?template=${templateId}`)
+    return response.data.results || response.data
+  },
+
+  // Create a template channel
+  async createTemplateChannel(data) {
+    const response = await apiClient.post('/template-channels/', data)
+    return response.data
+  },
+
+  // Update a template channel
+  async updateTemplateChannel(id, data) {
+    const response = await apiClient.put(`/template-channels/${id}/`, data)
+    return response.data
+  },
+
+  // Delete a template channel
+  async deleteTemplateChannel(id) {
+    const response = await apiClient.delete(`/template-channels/${id}/`)
+    return response.data
+  },
 }
 
 export default apiService
