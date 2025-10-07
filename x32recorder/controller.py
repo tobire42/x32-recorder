@@ -26,8 +26,7 @@ BUFFER_SIZE = 8192
 
 
 class MultiChannelRecorder:
-    def __init__(self, device, sample_rate, recording_path):
-        self.device = device
+    def __init__(self, sample_rate, recording_path):
         self.sample_rate = sample_rate
         self.recording_path = recording_path
         self.recording = False
@@ -39,18 +38,18 @@ class MultiChannelRecorder:
     def setup_audio_device(self):
         """Setup sounddevice for recording"""
 
-        device_info = sd.query_devices(self.device, 'input')
+        device_info = sd.query_devices(self.audiodevice_index, 'input')
         device_channels = device_info['max_input_channels']
         print(f"Using {self.channels} input channels from device {device_info['name']}")
 
         sd.check_input_settings(
-            device=self.device,
+            device=self.audevice_index,
             channels=device_channels,
             samplerate=self.sample_rate,
             dtype=np.float32
         )
         
-        print(f"sounddevice configured: device={self.device}, {self.channels} channels, {self.sample_rate}Hz")
+        print(f"sounddevice configured: device={self.audiodevice_index}, {self.channels} channels, {self.sample_rate}Hz")
         
     
     def setup_wave_files(self, base_filename):
@@ -128,13 +127,13 @@ class MultiChannelRecorder:
                 self._process_sounddevice_data(audio_int32)
         
         # get number of channels for sounddevice
-        device_info = sd.query_devices(self.device, 'input')
+        device_info = sd.query_devices(self.audiodevice_index, 'input')
         device_channels = device_info['max_input_channels']
         print(f"Using {self.channels} input channels from device {device_info['name']}")
 
         # Start stream
         self.stream = sd.InputStream(
-            device=self.device,
+            device=self.audiodevice_index,
             channels=device_channels,
             samplerate=self.sample_rate,
             callback=audio_callback,
@@ -206,6 +205,7 @@ def main():
         if recording.state == Recording.NEW:
             print(f"Starting new recording: {recording.filename}")
             recorder.channels = recording.channels
+            recorder.audiodevice_index = recording.audiodevice_index
             
             # Start recording
             success = recorder.start_recording(recording.filename)

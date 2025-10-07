@@ -15,6 +15,7 @@ class Recording(models.Model):
     channels = models.JSONField(default=list, help_text="List of integer channel numbers")
     duration = models.DurationField(default=None, blank=True, null=True)
     state = models.IntegerField(default=NEW)
+    audiodevice_index = models.IntegerField(default=0)
 
     @classmethod
     def get_active(cls):
