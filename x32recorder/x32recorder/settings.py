@@ -158,6 +158,11 @@ STATIC_URL = "static/"
 # WhiteNoise static files configuration
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# Additional locations for static files
+STATICFILES_DIRS = [
+    BASE_DIR / "frontend_build",
+]
+
 # Use ManifestStaticFilesStorage in production, fallback to default in development
 import os
 if os.path.exists(BASE_DIR / "staticfiles"):

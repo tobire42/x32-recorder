@@ -83,7 +83,45 @@ x32recorder/
    uv run python x32recorder/manage.py collectstatic --noinput
    ```
 
-## 🎛️ Konfiguration
+## � Frontend Build
+
+Das Projekt enthält ein modernes Vue.js 3 Frontend mit Vue Router für die Navigation zwischen Recorder und Template-Verwaltung.
+
+### Entwicklung (Frontend separat)
+
+Für die Frontend-Entwicklung mit Hot-Reload:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Das Frontend läuft dann auf `http://localhost:5173` und kommuniziert mit dem Django-Backend auf `http://localhost:8000/api/`.
+
+### Produktion (Django serviert Frontend)
+
+Um das Frontend zu builden und von Django servieren zu lassen:
+
+**Windows:**
+```cmd
+build_frontend.bat
+```
+
+**Linux/macOS:**
+```bash
+python build_frontend.py
+```
+
+Der Build-Prozess:
+1. Installiert Frontend-Dependencies (`npm install`)
+2. Baut das Frontend (`npm run build`)
+3. Output wird nach `x32recorder/frontend_build/` geschrieben
+4. Django serviert das Frontend automatisch unter `http://localhost:8000`
+
+**Hinweis**: Nach dem Build ist kein separater Frontend-Server mehr nötig. Django serviert sowohl API (`/api/*`) als auch das Frontend (alle anderen Routes).
+
+## �🎛️ Konfiguration
 
 ### Audio-Setup
 
