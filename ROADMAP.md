@@ -7,9 +7,10 @@
 - ✅ Nach Recording Multichannel Wave File in mehrere Einzel-Wavefiles aufsplitten - Durch sounddevice Umbau umgesetzt
 
 # todo
+- Transition Recording.filename -> Recording.uuid abschließen: Controller, API testen, Frontend Implementation
+- Recording-Download über Webinterface (via Zip File)
 - API URL im Frontend je nach Host ändern, aktuell wird nur localhost gecalled. Evtl über relative URLs aufrufen?
 - Mit Linux-System und X32 testen (!!)
-- Recording-Download über Webinterface
 - Bessere Ordnerstruktur (alle Kanäle in einem Folder speichern)
 - Transcoding nach MP3 oä
 - Aufnahme-Template mit Kanalkonfiguration im Frontend manage- und auswählbar machen.
