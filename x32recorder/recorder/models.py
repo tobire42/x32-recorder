@@ -1,4 +1,5 @@
 from django.db import models
+import uuid
 
 
 class Recording(models.Model):
@@ -11,7 +12,8 @@ class Recording(models.Model):
     PLAYING = 4
 
     date = models.DateTimeField(auto_now_add=True)
-    filename = models.CharField(max_length=256)
+    uuid = models.UUIDField(unique=True, editable=False, auto_created=True, default=uuid.uuid4)
+    name = models.CharField(max_length=256, blank=True, default="")
     channels = models.JSONField(default=list, help_text="List of integer channel numbers")
     duration = models.DurationField(default=None, blank=True, null=True)
     state = models.IntegerField(default=NEW)

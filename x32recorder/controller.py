@@ -2,8 +2,6 @@ import os
 import time
 import threading
 import wave
-import struct
-import platform
 from datetime import datetime
 import numpy as np
 import sounddevice as sd
@@ -13,13 +11,12 @@ import django
 
 django.setup()
 
+from django.conf import settings
 from recorder.models import Recording
 
 print("Using sounddevice backend (cross-platform)")
 
-CHANNEL_COUNT = 4
-RECORDING_PATH = "recordings/"
-AUDIODEV = 1  # Device name or index for sounddevice
+RECORDING_PATH = settings.RECORDING_PATH
 SAMPLE_RATE = 48000
 PERIOD_SIZE = 1024
 BUFFER_SIZE = 8192
@@ -52,21 +49,18 @@ class MultiChannelRecorder:
         print(f"sounddevice configured: device={self.audiodevice_index}, {self.channels} channels, {self.sample_rate}Hz")
         
     
-    def setup_wave_files(self, base_filename):
+    def setup_wave_files(self, uuid):
         """Setup wave files for each channel"""
         self.wave_files = []
         self.wave_writers = []
         
-        # Remove .wav extension if present to add channel number
-        if base_filename.endswith('.wav'):
-            base_filename = base_filename[:-4]
+        # scheme: uuid/ch01.wav - later uuid/ch01_guitar.wav
+        uuid_path = os.path.join(self.recording_path, str(uuid))
+        os.makedirs(uuid_path)
 
         for channel in self.channels:
-            filename = f"{base_filename}_ch{channel + 1:02d}.wav"
-            filepath = os.path.join(self.recording_path, filename)
-            
-            # Ensure recording directory exists
-            os.makedirs(self.recording_path, exist_ok=True)
+            filename = f"ch{channel + 1:02d}.wav"
+            filepath = os.path.join(uuid_path, filename)
             
             wave_file = wave.open(filepath, 'wb')
             wave_file.setnchannels(1)  # Mono file per channel
@@ -78,11 +72,11 @@ class MultiChannelRecorder:
             
         print(f"Created {len(self.wave_files)} wave files for channels")
     
-    def start_recording(self, base_filename):
+    def start_recording(self, uuid):
         """Start multi-channel recording"""
         self.setup_audio_device()
             
-        self.setup_wave_files(base_filename)
+        self.setup_wave_files(uuid)
         self.recording = True
         self.audio_data_queue = []
         
@@ -178,7 +172,7 @@ def list_audio_devices():
 def main():
     print(f"X32 Recorder Controller started")
     print(f"Audio backend: sounddevice")
-    print(f"Device: {AUDIODEV}, Channels: {CHANNEL_COUNT}, Sample Rate: {SAMPLE_RATE}Hz")
+    print(f"Sample Rate: {SAMPLE_RATE}Hz")
     print(f"Recording path: {RECORDING_PATH}")
     
     # List available devices for debugging
@@ -202,12 +196,12 @@ def main():
             continue
 
         if recording.state == Recording.NEW:
-            print(f"Starting new recording: {recording.filename}")
+            print(f"Starting new recording: {recording.uuid}")
             recorder.channels = recording.channels
             recorder.audiodevice_index = recording.audiodevice_index
             
             # Start recording
-            success = recorder.start_recording(recording.filename)
+            success = recorder.start_recording(recording.uuid)
             if success:
                 recording.state = Recording.RECORD
                 recording.save()
