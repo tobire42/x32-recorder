@@ -4,9 +4,7 @@
       <div class="card-header">
         <h2 class="card-title">Recordings</h2>
         <button @click="$emit('refresh')" class="btn-icon" title="Refresh recordings">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
-          </svg>
+          <RefreshIcon />
         </button>
       </div>
 
@@ -16,11 +14,7 @@
       </div>
 
       <div v-else-if="recordings.length === 0" class="empty-state">
-        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
+        <AlertIcon class="empty-icon" />
         <p>No recordings yet</p>
         <p class="empty-subtitle">Start a new recording to see it here</p>
       </div>
@@ -34,9 +28,7 @@
         >
           <div class="recording-header">
             <div class="recording-title">
-              <svg class="recording-icon" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="12" r="10"/>
-              </svg>
+              <RecordIcon class="recording-icon" />
               <span class="filename">{{ recording.filename }}</span>
             </div>
             <span class="state-badge" :class="getStateBadgeClass(recording.state)">
@@ -46,45 +38,29 @@
 
           <div class="recording-details">
             <div class="detail-item">
-              <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8" y1="2" x2="8" y2="6"/>
-                <line x1="3" y1="10" x2="21" y2="10"/>
-              </svg>
+              <CalendarIcon class="detail-icon" />
               <span>{{ formatDate(recording.date) }}</span>
             </div>
 
             <div class="detail-item">
-              <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 18V5l12-2v13M9 13c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3z"/>
-              </svg>
+              <MusicIcon class="detail-icon" />
               <span>{{ formatChannels(recording.channels) }}</span>
             </div>
 
             <div v-if="recording.duration" class="detail-item">
-              <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
-              </svg>
+              <ClockIcon class="detail-icon" />
               <span>{{ recording.duration }}</span>
             </div>
 
             <div class="detail-item">
-              <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-              </svg>
+              <DeviceIcon class="detail-icon" />
               <span>Device {{ recording.audiodevice_index }}</span>
             </div>
           </div>
 
           <div v-if="recording.state === 3" class="recording-actions">
             <button @click="confirmDelete(recording.id)" class="btn btn-delete" title="Delete recording">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-              </svg>
+              <DeleteIcon />
               Delete
             </button>
           </div>
@@ -109,9 +85,27 @@
 <script>
 import { ref, computed } from 'vue'
 import apiService from '../services/apiService'
+import RefreshIcon from './icons/RefreshIcon.vue'
+import AlertIcon from './icons/AlertIcon.vue'
+import RecordIcon from './icons/RecordIcon.vue'
+import CalendarIcon from './icons/CalendarIcon.vue'
+import MusicIcon from './icons/MusicIcon.vue'
+import ClockIcon from './icons/ClockIcon.vue'
+import DeviceIcon from './icons/DeviceIcon.vue'
+import DeleteIcon from './icons/DeleteIcon.vue'
 
 export default {
   name: 'RecordingsList',
+  components: {
+    RefreshIcon,
+    AlertIcon,
+    RecordIcon,
+    CalendarIcon,
+    MusicIcon,
+    ClockIcon,
+    DeviceIcon,
+    DeleteIcon
+  },
   props: {
     recordings: {
       type: Array,

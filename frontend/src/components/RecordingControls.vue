@@ -93,9 +93,7 @@
           class="btn btn-primary"
           :disabled="selectedChannels.length === 0 || selectedDevice === null"
         >
-          <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="currentColor">
-            <circle cx="12" cy="12" r="10"/>
-          </svg>
+          <PlayIcon class="btn-icon-svg" />
           Start Recording
         </button>
       </div>
@@ -116,9 +114,7 @@
           @click="handleStop"
           class="btn btn-danger"
         >
-          <svg class="btn-icon-svg" viewBox="0 0 24 24" fill="currentColor">
-            <rect x="6" y="6" width="12" height="12" rx="2"/>
-          </svg>
+          <StopIcon class="btn-icon-svg" />
           Stop Recording
         </button>
       </div>
@@ -128,10 +124,16 @@
 
 <script>
 import { ref, computed, watch } from 'vue'
+import PlayIcon from './icons/PlayIcon.vue'
+import StopIcon from './icons/StopIcon.vue'
 import apiService from '../services/apiService'
 
 export default {
   name: 'RecordingControls',
+  components: {
+    PlayIcon,
+    StopIcon
+  },
   props: {
     audioDevices: {
       type: Array,
