@@ -41,6 +41,12 @@ const apiService = {
     return response.data
   },
 
+  // Set a marker during recording
+  async setMarker(id) {
+    const response = await apiClient.post(`/recordings/${id}/set_marker/`)
+    return response.data
+  },
+
   // Download a recording as ZIP
   async downloadRecording(id) {
     const response = await apiClient.get(`/recordings/${id}/download/`, {

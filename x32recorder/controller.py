@@ -214,6 +214,7 @@ def main():
             # Start recording
             success = recorder.start_recording(recording.uuid)
             if success:
+                recording.started_at = datetime.now()
                 recording.state = Recording.RECORD
                 recording.save()
                 current_recorder_instance = recorder

@@ -11,7 +11,8 @@ class Recording(models.Model):
 
     PLAYING = 4
 
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField(auto_now_add=True)#
+    started_at = models.DateTimeField(blank=True, null=True, default=None)
     uuid = models.UUIDField(unique=True, editable=False, auto_created=True, default=uuid.uuid4)
     name = models.CharField(max_length=256, blank=True, default="")
     channels = models.JSONField(default=list, help_text="List of integer channel numbers")
@@ -62,3 +63,10 @@ class RecordingTemplateChannel(models.Model):
                 fields=["template", "channel_no"], name="channel_no_unique_in_template"
             )
         ]
+
+
+class RecordingMarker(models.Model):
+    recording = models.ForeignKey(
+        "Recording", related_name="markers", on_delete=models.CASCADE
+    )
+    timestamp = models.DurationField()

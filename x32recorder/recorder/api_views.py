@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.http import StreamingHttpResponse
 from django.conf import settings
-from .models import Recording, RecordingTemplate, RecordingTemplateChannel
+from .models import Recording, RecordingTemplate, RecordingTemplateChannel, RecordingMarker
 from .serializers import (
     RecordingSerializer,
     RecordingTemplateSerializer,
@@ -69,6 +69,36 @@ class RecordingViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(recording)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
+    @action(detail=True, methods=['post'])
+    def set_marker(self, request, pk=None):
+        """Set a marker for the recording at the current time"""
+        recording = self.get_object()
+        
+        if recording.state not in [Recording.RECORD]:
+            return Response(
+                {'error': 'Recording is not active'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Calculate elapsed time since recording started
+        if not recording.started_at:
+            return Response(
+                {'error': 'Recording has not started yet'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        elapsed_time = datetime.datetime.now(datetime.timezone.utc) - recording.started_at
+        
+        marker = RecordingMarker.objects.create(
+            recording=recording,
+            timestamp=elapsed_time
+        )
+        
+        return Response(
+            {'message': f'Marker set at {elapsed_time}'}, 
+            status=status.HTTP_201_CREATED
+        )
+
     @action(detail=True, methods=['post'])
     def stop(self, request, pk=None):
         """Stop a specific recording"""

@@ -110,13 +110,23 @@
           <p><strong>State:</strong> {{ getStateLabel(activeRecording?.state) }}</p>
         </div>
 
-        <button
-          @click="handleStop"
-          class="btn btn-danger"
-        >
-          <StopIcon class="btn-icon-svg" />
-          Stop Recording
-        </button>
+        <div class="recording-actions">
+          <button
+            @click="handleSetMarker"
+            class="btn btn-warning"
+            :disabled="activeRecording?.state !== 1"
+          >
+            <MarkerIcon class="btn-icon-svg" />
+            Add Marker
+          </button>
+          <button
+            @click="handleStop"
+            class="btn btn-danger"
+          >
+            <StopIcon class="btn-icon-svg" />
+            Stop Recording
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -126,13 +136,15 @@
 import { ref, computed, watch } from 'vue'
 import PlayIcon from './icons/PlayIcon.vue'
 import StopIcon from './icons/StopIcon.vue'
+import MarkerIcon from './icons/MarkerIcon.vue'
 import apiService from '../services/apiService'
 
 export default {
   name: 'RecordingControls',
   components: {
     PlayIcon,
-    StopIcon
+    StopIcon,
+    MarkerIcon
   },
   props: {
     audioDevices: {
@@ -248,6 +260,21 @@ export default {
       }
     }
 
+    const handleSetMarker = async () => {
+      if (!props.activeRecording || props.activeRecording.state !== 1) {
+        return
+      }
+
+      try {
+        await apiService.setMarker(props.activeRecording.id)
+        console.log('Marker added successfully')
+        // You could emit an event or show a notification here if needed
+      } catch (error) {
+        console.error('Failed to add marker:', error)
+        alert('Failed to add marker: ' + (error.response?.data?.error || error.message))
+      }
+    }
+
     const formatChannels = (channels) => {
       if (!channels || !Array.isArray(channels)) return 'N/A'
       return channels.map(ch => ch + 1).join(', ')
@@ -273,6 +300,7 @@ export default {
       toggleChannel,
       handleStart,
       handleStop,
+      handleSetMarker,
       formatChannels,
       getStateLabel
     }
@@ -444,6 +472,17 @@ export default {
   box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
 }
 
+.btn-warning {
+  background: #f59e0b;
+  color: white;
+}
+
+.btn-warning:not(:disabled):hover {
+  background: #d97706;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
 .btn-icon-svg {
   width: 20px;
   height: 20px;
@@ -503,6 +542,12 @@ export default {
 
 .recording-info strong {
   color: #2d3748;
+}
+
+.recording-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
 }
 
 @media (max-width: 768px) {
