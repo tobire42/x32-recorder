@@ -27,15 +27,15 @@
           </p>
         </div>
 
-        <!-- Filename Input -->
+        <!-- Recording Name Input -->
         <div class="form-group">
-          <label for="filename" class="label">Filename</label>
+          <label for="recordingName" class="label">Recording Name</label> 
           <input
-            id="filename"
-            v-model="filename"
+            id="recordingName"
+            v-model="recordingName"
             type="text"
             class="input"
-            placeholder="Leave empty for auto-generated name"
+            placeholder="Enter recording name (optional)"
           />
         </div>
 
@@ -105,7 +105,7 @@
         </div>
         
         <div class="recording-info">
-          <p><strong>Filename:</strong> {{ activeRecording?.filename }}</p>
+          <p><strong>Name:</strong> {{ activeRecording?.name }}</p>
           <p><strong>Channels:</strong> {{ formatChannels(activeRecording?.channels) }}</p>
           <p><strong>State:</strong> {{ getStateLabel(activeRecording?.state) }}</p>
         </div>
@@ -158,7 +158,7 @@ export default {
   },
   emits: ['start-recording', 'stop-recording', 'refresh-devices'],
   setup(props, { emit }) {
-    const filename = ref('')
+    const recordingName = ref('')
     const selectedDevice = ref(null)
     const selectedChannels = ref([1, 2])
     const selectedTemplateId = ref(null)
@@ -231,15 +231,8 @@ export default {
     const handleStart = () => {
       const recordingData = {
         audiodevice_index: selectedDevice.value,
-        channels: selectedChannels.value
-      }
-      
-      if (filename.value.trim()) {
-        let fname = filename.value.trim()
-        if (!fname.endsWith('.wav')) {
-          fname += '.wav'
-        }
-        recordingData.filename = fname
+        channels: selectedChannels.value,
+        name: recordingName.value.trim() 
       }
 
       emit('start-recording', recordingData)
@@ -270,7 +263,7 @@ export default {
     }
 
     return {
-      filename,
+      recordingName,
       selectedDevice,
       selectedChannels,
       selectedTemplateId,

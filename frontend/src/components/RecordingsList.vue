@@ -29,7 +29,7 @@
           <div class="recording-header">
             <div class="recording-title">
               <RecordIcon class="recording-icon" />
-              <span class="filename">{{ recording.filename }}</span>
+              <span class="filename">{{ recording.name }}</span>
             </div>
             <span class="state-badge" :class="getStateBadgeClass(recording.state)">
               {{ getStateLabel(recording.state) }}

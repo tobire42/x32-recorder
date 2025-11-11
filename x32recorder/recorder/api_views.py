@@ -31,14 +31,7 @@ class RecordingViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Create new recording
-        filename = request.data.get('filename',
-                                    datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".wav")
-        if not filename.endswith('.wav'):
-            return Response(
-                {'error': 'Filename must end with .wav'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        name = request.data.get('name', '').strip()
         channels = request.data.get('channels', [1, 2])  # Default to channels 1 and 2
 
         audiodevice_index = request.data.get('audiodevice_index', 0)  # Default to device index 0
@@ -59,7 +52,7 @@ class RecordingViewSet(viewsets.ModelViewSet):
             )
         
         recording = Recording.objects.create(
-            filename=filename,
+            name=name,
             channels=channels,
             state=Recording.NEW,
             audiodevice_index=audiodevice_index
