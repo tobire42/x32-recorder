@@ -7,9 +7,9 @@
 - ✅ Nach Recording Multichannel Wave File in mehrere Einzel-Wavefiles aufsplitten - Durch sounddevice Umbau umgesetzt
 - Transition Recording.filename -> Recording.uuid abschließen: Controller, API testen, Frontend Implementation
 - Recording-Download über Webinterface (via Zip File)
+- API URL im Frontend je nach Host ändern, aktuell wird nur localhost gecalled. Evtl über relative URLs aufrufen?
 
 # todo
-- API URL im Frontend je nach Host ändern, aktuell wird nur localhost gecalled. Evtl über relative URLs aufrufen?
 - Möglichkeit, während eines Recordings Marker zu setzen. Diese sollen erstmal in der Datenbank gespeichert werden - in Zukunft dann in irgendeiner Form exportiert werden.
 - Mit Linux-System und X32 testen (!!)
 - Bessere Ordnerstruktur (alle Kanäle in einem Folder speichern)
