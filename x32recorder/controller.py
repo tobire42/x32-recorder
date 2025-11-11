@@ -58,8 +58,17 @@ class MultiChannelRecorder:
         uuid_path = os.path.join(self.recording_path, str(uuid))
         os.makedirs(uuid_path)
 
+        recording = Recording.objects.get(uuid=uuid)
+
         for channel in self.channels:
-            filename = f"ch{channel + 1:02d}.wav"
+            
+            if recording.template:
+                template_channel = recording.template.channels.filter(channel_no=channel + 1).first()
+                if template_channel:
+                    filename = f"ch{channel + 1:02d}_{template_channel.name.replace(' ', '_')}.wav"
+                else:
+                    filename = f"ch{channel + 1:02d}.wav"
+
             filepath = os.path.join(uuid_path, filename)
             
             wave_file = wave.open(filepath, 'wb')

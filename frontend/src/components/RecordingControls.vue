@@ -232,7 +232,8 @@ export default {
       const recordingData = {
         audiodevice_index: selectedDevice.value,
         channels: selectedChannels.value,
-        name: recordingName.value.trim() 
+        name: recordingName.value.trim(),
+        template_id: selectedTemplateId.value
       }
 
       emit('start-recording', recordingData)

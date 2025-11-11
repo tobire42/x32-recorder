@@ -36,6 +36,8 @@ class RecordingViewSet(viewsets.ModelViewSet):
 
         audiodevice_index = request.data.get('audiodevice_index', 0)  # Default to device index 0
         
+        template_id = request.data.get('template_id', None)
+
         # Ensure channels is a list of integers
         if not isinstance(channels, list):
             return Response(
@@ -55,7 +57,8 @@ class RecordingViewSet(viewsets.ModelViewSet):
             name=name,
             channels=channels,
             state=Recording.NEW,
-            audiodevice_index=audiodevice_index
+            audiodevice_index=audiodevice_index,
+            template_id=template_id
         )
         
         serializer = self.get_serializer(recording)

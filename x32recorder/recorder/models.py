@@ -18,6 +18,14 @@ class Recording(models.Model):
     duration = models.DurationField(default=None, blank=True, null=True)
     state = models.IntegerField(default=NEW)
     audiodevice_index = models.IntegerField(default=0)
+    template = models.ForeignKey(
+        "RecordingTemplate",
+        related_name="recordings",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None
+    )
 
     @classmethod
     def get_active(cls):
