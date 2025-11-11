@@ -59,6 +59,10 @@
           </div>
 
           <div v-if="recording.state === 3" class="recording-actions">
+            <button @click="downloadRecording(recording)" class="btn btn-download" title="Download recording">
+              <DownloadIcon />
+              Download
+            </button>
             <button @click="confirmDelete(recording.id)" class="btn btn-delete" title="Delete recording">
               <DeleteIcon />
               Delete
@@ -84,6 +88,7 @@
 
 <script>
 import { ref, computed } from 'vue'
+import { format } from 'date-fns'
 import apiService from '../services/apiService'
 import RefreshIcon from './icons/RefreshIcon.vue'
 import AlertIcon from './icons/AlertIcon.vue'
@@ -92,6 +97,7 @@ import CalendarIcon from './icons/CalendarIcon.vue'
 import MusicIcon from './icons/MusicIcon.vue'
 import ClockIcon from './icons/ClockIcon.vue'
 import DeviceIcon from './icons/DeviceIcon.vue'
+import DownloadIcon from './icons/DownloadIcon.vue'
 import DeleteIcon from './icons/DeleteIcon.vue'
 
 export default {
@@ -104,6 +110,7 @@ export default {
     MusicIcon,
     ClockIcon,
     DeviceIcon,
+    DownloadIcon,
     DeleteIcon
   },
   props: {
@@ -165,6 +172,38 @@ export default {
       return `${displayChannels.length} channels`
     }
 
+    const downloadRecording = async (recording) => {
+      try {
+        const blob = await apiService.downloadRecording(recording.id)
+        
+        // Create a download link
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        
+        // Format filename: use recording name or formatted date as YYYY-MM-DD_HH-mm-ss
+        const formattedDate = format(new Date(recording.date), 'yyyy-MM-dd_HH-mm-ss')
+        let zipFilename
+        if (recording.name) {
+          zipFilename = `${formattedDate}_${recording.name}.zip`
+        } else {
+          zipFilename = `${formattedDate}.zip`
+        }
+        link.download = zipFilename
+        
+        // Trigger download
+        document.body.appendChild(link)
+        link.click()
+        
+        // Cleanup
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      } catch (error) {
+        console.error('Download failed:', error)
+        alert('Failed to download recording')
+      }
+    }
+
     const confirmDelete = (id) => {
       recordingToDelete.value = id
       showDeleteModal.value = true
@@ -197,6 +236,7 @@ export default {
       getStateBadgeClass,
       formatDate,
       formatChannels,
+      downloadRecording,
       confirmDelete,
       cancelDelete,
       handleDelete
@@ -428,6 +468,17 @@ export default {
 .btn svg {
   width: 16px;
   height: 16px;
+}
+
+.btn-download {
+  background: #e6f7ff;
+  color: #0066cc;
+  border: 1px solid #b3d9ff;
+}
+
+.btn-download:hover {
+  background: #cce7ff;
+  border-color: #66b3ff;
 }
 
 .btn-delete {

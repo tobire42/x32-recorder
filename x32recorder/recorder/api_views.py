@@ -3,6 +3,8 @@ from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.http import StreamingHttpResponse
+from django.conf import settings
 from .models import Recording, RecordingTemplate, RecordingTemplateChannel
 from .serializers import (
     RecordingSerializer,
@@ -12,6 +14,9 @@ from .serializers import (
 import datetime
 import sounddevice as sd
 from pprint import pprint
+import os
+import zipfile
+from pathlib import Path
 
 
 class RecordingViewSet(viewsets.ModelViewSet):
@@ -80,6 +85,64 @@ class RecordingViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(recording)
         return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'])
+    def download(self, request, pk=None):
+        """Download recording files as a ZIP archive"""
+        recording = self.get_object()
+        
+        # Get the recordings directory from settings or use default
+        recordings_dir = os.path.join(settings.RECORDING_PATH, str(recording.uuid))
+        
+        recording_dir = Path(recordings_dir)
+        
+        # Find all files that match this recording
+        matching_files = []
+        if recording_dir.exists():
+            # Look for files starting with the recording name
+            for file_path in recording_dir.iterdir():
+                if file_path.is_file():
+                    matching_files.append(file_path)
+        
+        if not matching_files:
+            return Response(
+                {'error': 'Recording files not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Create a generator function for streaming ZIP
+        def zip_generator():
+            """Generator that yields ZIP file chunks"""
+            import io
+            
+            # Create an in-memory buffer for the ZIP
+            zip_buffer = io.BytesIO()
+            
+            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                # Add all matching files
+                for file_path in matching_files:
+                    zip_file.write(file_path, file_path.name)
+            
+            # Get the ZIP data
+            zip_buffer.seek(0)
+            
+            # Yield the ZIP file in chunks
+            chunk_size = 8192
+            while True:
+                chunk = zip_buffer.read(chunk_size)
+                if not chunk:
+                    break
+                yield chunk
+        
+        # Create the streaming response
+        zip_filename = f"{recording.name or recording.uuid}.zip"
+        response = StreamingHttpResponse(
+            zip_generator(),
+            content_type='application/zip'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{zip_filename}"'
+        
+        return response
 
 
 class RecordingTemplateViewSet(viewsets.ModelViewSet):

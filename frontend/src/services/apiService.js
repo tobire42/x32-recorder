@@ -41,6 +41,14 @@ const apiService = {
     return response.data
   },
 
+  // Download a recording as ZIP
+  async downloadRecording(id) {
+    const response = await apiClient.get(`/recordings/${id}/download/`, {
+      responseType: 'blob'
+    })
+    return response.data
+  },
+
   // Delete a recording
   async deleteRecording(id) {
     const response = await apiClient.delete(`/recordings/${id}/`)

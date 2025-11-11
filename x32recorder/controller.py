@@ -68,6 +68,8 @@ class MultiChannelRecorder:
                     filename = f"ch{channel + 1:02d}_{template_channel.name.replace(' ', '_')}.wav"
                 else:
                     filename = f"ch{channel + 1:02d}.wav"
+            else:
+                filename = f"ch{channel + 1:02d}.wav"
 
             filepath = os.path.join(uuid_path, filename)
             
