@@ -18,16 +18,3 @@ def index(request):
         },
     )
 
-
-def startrecording(request):
-    filename = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".wav"
-    rec = Recording(channel_count=2, filename=filename)
-    rec.save()
-    return redirect(index)
-
-
-def stoprecording(request):
-    recording_active = Recording.get_active()
-    recording_active.state = Recording.STOP
-    recording_active.save()
-    return redirect(index)

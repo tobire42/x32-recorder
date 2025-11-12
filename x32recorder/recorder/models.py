@@ -1,4 +1,5 @@
 from django.db import models
+import uuid
 
 
 class Recording(models.Model):
@@ -10,11 +11,22 @@ class Recording(models.Model):
 
     PLAYING = 4
 
-    date = models.DateTimeField(auto_now_add=True)
-    filename = models.CharField(max_length=256)
-    channel_count = models.IntegerField()
+    date = models.DateTimeField(auto_now_add=True)#
+    started_at = models.DateTimeField(blank=True, null=True, default=None)
+    uuid = models.UUIDField(unique=True, editable=False, auto_created=True, default=uuid.uuid4)
+    name = models.CharField(max_length=256, blank=True, default="")
+    channels = models.JSONField(default=list, help_text="List of integer channel numbers")
     duration = models.DurationField(default=None, blank=True, null=True)
     state = models.IntegerField(default=NEW)
+    audiodevice_index = models.IntegerField(default=0)
+    template = models.ForeignKey(
+        "RecordingTemplate",
+        related_name="recordings",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None
+    )
 
     @classmethod
     def get_active(cls):
@@ -23,6 +35,11 @@ class Recording(models.Model):
             return active_recordings.get()
         except cls.DoesNotExist:
             return None
+
+    @property
+    def channel_count(self):
+        """Backward compatibility property to get the number of channels"""
+        return len(self.channels) if self.channels else 0
 
     def __str__(self) -> str:
         return f"Recorded on {self.date} - {self.duration}"
@@ -39,7 +56,6 @@ class RecordingTemplateChannel(models.Model):
     )
     channel_no = models.IntegerField()
     name = models.CharField(max_length=256)
-    stereo = models.BooleanField(default=False)
 
     class Meta:
         constraints = [
@@ -47,3 +63,10 @@ class RecordingTemplateChannel(models.Model):
                 fields=["template", "channel_no"], name="channel_no_unique_in_template"
             )
         ]
+
+
+class RecordingMarker(models.Model):
+    recording = models.ForeignKey(
+        "Recording", related_name="markers", on_delete=models.CASCADE
+    )
+    timestamp = models.DurationField()

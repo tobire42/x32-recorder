@@ -1,18 +1,28 @@
-[tool.poetry]
+[project]
 name = "x32-recorder"
 version = "0.1.0"
 description = ""
-authors = ["Tobias Reineke <tobi@g3th.net>"]
-package-mode = false
+authors = [
+    { name = "Tobias Reineke", email = "tobi@g3th.net" }
+]
+dependencies = [
+    "django>=4.1.2",
+    "djangorestframework>=3.15.2",
+    "django-cors-headers>=4.3.0",
+    "waitress>=3.0.0",
+    "numpy>=1.24.4",
+    "sounddevice>=0.5.2",
+    "whitenoise>=6.7.0",
+    "httpie>=3.2.4",
+]
+requires-python = ">=3.8"
 
-[tool.poetry.dependencies]
-python = ">=3.8,<4"
-Django = "^4.1.2"
-gunicorn = "^20.1.0"
-
-[tool.poetry.dev-dependencies]
-black = {version = "^22.10.0", allow-prereleases = true}
+[tool.uv]
+dev-dependencies = [
+    "black>=22.10.0",
+]
+package = false
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"

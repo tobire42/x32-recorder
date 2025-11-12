@@ -127,3 +127,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+nohup.out
+*.pid
+
+x32recorder/staticfiles/
+x32recorder/frontend_build/
+
+x32recorder/recordings/

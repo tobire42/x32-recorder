@@ -1,15 +1,18 @@
 # X32 Recorder
 
-**X32 Recorder** ist eine Django-basierte Webanwendung zur Steuerung und Verwaltung von Mehrkanal-Audioaufnahmen. Das System wurde ursprünglich für das Behringer X32 Mischpult entwickelt, funktioniert aber mit jedem ALSA-kompatiblen Audio-Interface.
+**X32 Recorder** ist eine Django-basierte Webanwendung zur Steuerung und Verwaltung von Mehrkanal-Audioaufnahmen. Das System wurde ursprünglich für das Behringer X32 Mischpult entwickelt, funktioniert aber mit jedem sounddevice-kompatiblen Audio-Interface auf **Windows, macOS und Linux**.
 
 ## 🎯 Features
 
+- **Cross-Platform**: Läuft auf Windows, macOS und Linux
 - **Web-Interface**: Intuitive Bedienung zum Starten und Stoppen von Aufnahmen
+- **REST API**: Vollständige API für alle Funktionen
 - **Mehrkanal-Aufnahme**: Unterstützung für Mehrkanal-Audio-Aufnahmen
 - **Recording-Management**: Übersicht und Verwaltung aller vergangenen Aufnahmen
 - **Template-System**: Aufnahme-Templates mit konfigurierbaren Kanälen
 - **Echtzeitsteuerung**: Separates Controller-Skript für die Hardware-Anbindung
 - **Flexible Konfiguration**: Anpassbare Kanalzahl und Audio-Device-Einstellungen
+- **Produktions-ready**: Waitress WSGI Server für stabile Deployments
 
 ## 🏗️ Architektur
 
@@ -45,10 +48,12 @@ x32recorder/
 ### Voraussetzungen
 
 - **Python 3.8-3.11**
-- **Poetry** (Dependency Management)
-- **SoX** (`rec`-Befehl) für Audio-Aufnahmen
-- **ALSA** (Linux Audio-System)
-- Audio-Interface mit ALSA-Unterstützung
+- **uv** (Dependency Management) - Install with: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- **PortAudio** (für sounddevice):
+  - **Ubuntu/Debian**: `sudo apt-get install portaudio19-dev`
+  - **Windows**: Automatisch mit sounddevice installiert
+  - **macOS**: `brew install portaudio`
+- Audio-Interface mit sounddevice-Unterstützung (cross-platform)
 
 ### Setup
 
@@ -60,20 +65,63 @@ x32recorder/
 
 2. **Abhängigkeiten installieren**
    ```bash
-   poetry install
+   uv sync
    ```
 
 3. **Datenbank initialisieren**
    ```bash
-   poetry run python x32recorder/manage.py migrate
+   uv run python x32recorder/manage.py migrate
    ```
 
 4. **Admin-User erstellen (optional)**
    ```bash
-   poetry run python x32recorder/manage.py createsuperuser
+   uv run python x32recorder/manage.py createsuperuser
    ```
 
-## 🎛️ Konfiguration
+5. **Static Files sammeln (für Produktion)**
+   ```bash
+   uv run python x32recorder/manage.py collectstatic --noinput
+   ```
+
+## � Frontend Build
+
+Das Projekt enthält ein modernes Vue.js 3 Frontend mit Vue Router für die Navigation zwischen Recorder und Template-Verwaltung.
+
+### Entwicklung (Frontend separat)
+
+Für die Frontend-Entwicklung mit Hot-Reload:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Das Frontend läuft dann auf `http://localhost:5173` und kommuniziert mit dem Django-Backend auf `http://localhost:8000/api/`.
+
+### Produktion (Django serviert Frontend)
+
+Um das Frontend zu builden und von Django servieren zu lassen:
+
+**Windows:**
+```cmd
+build_frontend.bat
+```
+
+**Linux/macOS:**
+```bash
+python build_frontend.py
+```
+
+Der Build-Prozess:
+1. Installiert Frontend-Dependencies (`npm install`)
+2. Baut das Frontend (`npm run build`)
+3. Output wird nach `x32recorder/frontend_build/` geschrieben
+4. Django serviert das Frontend automatisch unter `http://localhost:8000`
+
+**Hinweis**: Nach dem Build ist kein separater Frontend-Server mehr nötig. Django serviert sowohl API (`/api/*`) als auch das Frontend (alle anderen Routes).
+
+## �🎛️ Konfiguration
 
 ### Audio-Setup
 
@@ -82,26 +130,38 @@ Bearbeiten Sie `x32recorder/controller.py` für Ihre Hardware-Konfiguration:
 ```python
 CHANNEL_COUNT = 4                        # Anzahl Kanäle
 RECORDING_PATH = "/home/pi/recordings/"  # Aufnahme-Verzeichnis  
-AUDIODEV = "hw:2"                        # ALSA-Device
+AUDIODEV = "hw:2"                        # Audio-Device Name oder Index
 ```
 
-### ALSA-Device ermitteln
+### Audio-Device ermitteln
 
 ```bash
-# Verfügbare Audio-Devices anzeigen
-arecord -l
+# Verfügbare Audio-Devices anzeigen (mit sounddevice)
+uv run python -c "import sounddevice; print(sounddevice.query_devices())"
 
-# Test-Aufnahme
-arecord -D hw:2 -c 4 -f S24_LE test.wav
+# Oder direkt im Controller starten um Devices zu sehen
+uv run python x32recorder/controller.py
 ```
 
 ## 🎵 Verwendung
 
 ### 1. Web-Interface starten
 
+#### Entwicklungsserver
 ```bash
-poetry run python x32recorder/manage.py runserver
+uv run python x32recorder/manage.py runserver
 ```
+
+#### Produktionsserver mit Waitress (Cross-platform)
+```bash
+# Einfacher Start
+uv run waitress-serve --host=0.0.0.0 --port=8000 --chdir=x32recorder x32recorder.wsgi:application
+
+# Mit mehr Threads für bessere Performance
+uv run waitress-serve --host=0.0.0.0 --port=8000 --threads=6 --chdir=x32recorder x32recorder.wsgi:application
+```
+
+**Hinweis**: Static Files werden automatisch von WhiteNoise bereitgestellt. Bei Änderungen an CSS/JS-Dateien muss `collectstatic` erneut ausgeführt werden.
 
 Zugriff unter: [http://localhost:8000](http://localhost:8000)
 
@@ -110,10 +170,61 @@ Zugriff unter: [http://localhost:8000](http://localhost:8000)
 **Wichtig**: Der Controller muss auf dem System mit Audio-Hardware laufen!
 
 ```bash
-poetry run python x32recorder/controller.py
+uv run python x32recorder/controller.py
 ```
 
-### 3. Aufnahme bedienen
+### 3. Cross-Platform Service Management (Empfohlen)
+
+Verwenden Sie das neue `manage_services.py` Skript für einfaches Starten und Stoppen beider Services auf allen Plattformen:
+
+#### Linux/macOS:
+```bash
+# Beide Services im Hintergrund starten
+python manage_services.py start
+
+# Status der Services prüfen
+python manage_services.py status
+
+# Beide Services stoppen
+python manage_services.py stop
+
+# Services neustarten
+python manage_services.py restart
+
+# Logs anzeigen
+python manage_services.py logs
+```
+
+#### Windows:
+```cmd
+# Beide Services im Hintergrund starten
+manage_services.bat start
+
+# Status der Services prüfen
+manage_services.bat status
+
+# Beide Services stoppen
+manage_services.bat stop
+
+# Services neustarten
+manage_services.bat restart
+
+# Logs anzeigen
+manage_services.bat logs
+```
+
+**Hinweis**: Das neue Service-Management verwendet Waitress statt Gunicorn für bessere Windows-Kompatibilität.
+
+# Services neustarten
+./manage_services.sh restart
+
+# Logs anzeigen
+./manage_services.sh logs
+```
+
+Das Skript erstellt PID-Dateien in `./pids/` und Log-Dateien in `./logs/`.
+
+### 4. Aufnahme bedienen
 
 - **Aufnahme starten**: Button im Web-Interface klicken
 - **Aufnahme stoppen**: Stop-Button während laufender Aufnahme
@@ -136,7 +247,6 @@ poetry run python x32recorder/controller.py
 - `template`: Zugehöriges Template
 - `channel_no`: Kanalnummer
 - `name`: Kanalbezeichnung
-- `stereo`: Stereo-Flag
 
 ## 🔧 Admin-Interface
 
@@ -163,29 +273,35 @@ Geplante Features (siehe `ROADMAP.md`):
 
 ### Entwicklungsserver starten
 ```bash
-poetry run python x32recorder/manage.py runserver
+uv run python x32recorder/manage.py runserver
 ```
 
 ### Code-Formatierung
 ```bash
-poetry run black .
+uv run black .
 ```
 
 ### Tests ausführen
 ```bash
-poetry run python x32recorder/manage.py test
+uv run python x32recorder/manage.py test
 ```
 
 ## 🐛 Troubleshooting
 
 ### Audio-Probleme
-- ALSA-Device mit `arecord -l` prüfen
-- Berechtigungen für Audio-Hardware prüfen
-- SoX-Installation überprüfen: `rec --version`
+- Audio-Device mit `uv run python -c "import sounddevice; print(sounddevice.query_devices())"` prüfen
+- PortAudio-Installation überprüfen: `sudo apt-get install portaudio19-dev` (Ubuntu/Debian)
+- sounddevice-Installation: `uv add sounddevice`
 
 ### Django-Probleme
 - Datenbank-Migrationen: `python manage.py migrate`
 - Static Files: `python manage.py collectstatic`
+- Static Files nicht sichtbar: Prüfen ob WhiteNoise korrekt konfiguriert ist
+
+### Static Files Probleme
+- Static Files sammeln: `uv run python x32recorder/manage.py collectstatic --noinput`
+- Cache leeren: Browser-Cache oder `collectstatic --clear`
+- WhiteNoise-Konfiguration in `settings.py` prüfen
 
 ## 📝 Lizenz
 
@@ -206,5 +322,6 @@ Beiträge sind willkommen! Bitte:
 ## ⚠️ Hinweise
 
 - Das Projekt befindet sich in aktiver Entwicklung
-- Getestet auf Linux-Systemen mit ALSA
-- Für Produktionsumgebungen `gunicorn` verwenden
+- Getestet auf Linux-Systemen, Windows-Kompatibilität durch Waitress und sounddevice
+- Für Produktionsumgebungen `waitress` verwenden (cross-platform)
+- Das neue `manage_services.py` Skript funktioniert auf allen Plattformen (Linux, macOS, Windows)

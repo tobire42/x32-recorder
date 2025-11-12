@@ -14,10 +14,25 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
+from django.conf import settings
+from django.views.static import serve
+from .views import FrontendView
 
 urlpatterns = [
-    path('', include('recorder.urls')),
-    path('recorder/', include('recorder.urls')),
+    path('api/', include('recorder.api_urls')),
     path('admin/', admin.site.urls),
+]
+
+# Serve frontend assets directly from frontend_build
+if settings.DEBUG:
+    urlpatterns += [
+        re_path(r'^assets/(?P<path>.*)$', serve, {
+            'document_root': settings.BASE_DIR / 'frontend_build' / 'assets',
+        }),
+    ]
+
+# Catch-all pattern for Vue Router - must be last
+urlpatterns += [
+    re_path(r'^.*$', FrontendView.as_view(), name='frontend'),
 ]
