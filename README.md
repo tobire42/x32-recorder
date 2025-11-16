@@ -286,6 +286,46 @@ uv run black .
 uv run python x32recorder/manage.py test
 ```
 
+## Autostart / systemd (Linux, Raspberry Pi)
+
+Diese Anleitung zeigt eine einfache systemd-Vorlage, mit der der Recorder (über das mitgelieferte `manage_services.py`) beim Systemstart automatisch gestartet werden kann. Passen Sie Pfade und Benutzer (User) an Ihr System an.
+
+### systemd Datei Anlegen:
+```bash
+sudo nano /etc/systemd/system/x32-recorder.service
+```
+Bespielkonfigurtation:
+```bash
+[Unit]
+Description=X32 Recorder Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+WorkingDirectory=/home/pi/x32-recorder
+
+ExecStart=/usr/bin/python3 /home/pi/x32-recorder/manage_services.py start
+ExecStop=/usr/bin/python3 /home/pi/x32-recorder/manage_services.py stop
+
+Environment=PATH=/usr/local/bin:/usr/bin:/bin:/home/pi/.local/bin
+
+User=pi
+Group=pi
+
+[Install]
+WantedBy=multi-user.target
+```
+Systemd registirieren und neu laden
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable x32-recorder.service
+sudo systemctl start x32-recorder.service
+
+```
+
 ## 🐛 Troubleshooting
 
 ### Audio-Probleme
