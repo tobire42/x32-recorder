@@ -173,9 +173,9 @@ class ServiceManager:
         print("Starting Controller...")
         
         # Change to project directory
-        os.chdir(self.script_dir)
+        os.chdir(self.script_dir / "x32recorder")
         
-        cmd = ["uv", "run", "python", "x32recorder/controller.py"]
+        cmd = ["uv", "run", "python", "controller.py"]
         
         try:
             if self.is_windows:
