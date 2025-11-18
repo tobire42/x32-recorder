@@ -135,3 +135,15 @@ x32recorder/staticfiles/
 x32recorder/frontend_build/
 
 x32recorder/recordings/
+
+# C Extension build artifacts
+build/
+*.so
+*.pyd
+*.o
+*.obj
+audio_writer.c
+audio_writer*.so
+audio_writer*.pyd
+x32recorder/audio_writer*.so
+x32recorder/audio_writer*.pyd
