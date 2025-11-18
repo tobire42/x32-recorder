@@ -1,12 +1,15 @@
 """
 Setup script for building the audio_writer C extension module
+
+This setup.py is ONLY for the C extension.
+Use pyproject.toml for main project dependencies.
 """
 from setuptools import setup, Extension
 import numpy
 
 audio_writer_module = Extension(
     'audio_writer',
-    sources=['x32recorder/audio_writer.c'],
+    sources=['audio_writer_ext/audio_writer.c'],
     include_dirs=[numpy.get_include()],
     extra_compile_args=[
         '-O3',  # Maximum optimization

@@ -4,6 +4,8 @@
 
 Implemented a **Python C extension module** (`audio_writer`) that provides high-performance audio processing by handling the float32 → 24-bit PCM conversion and multi-channel file writing in compiled C code. This approach is **cleaner and more efficient** than a subprocess-based solution.
 
+**Project Structure**: The C extension is organized in its own `audio_writer_ext/` directory, separate from the main project to avoid conflicts with `pyproject.toml` and the main build system.
+
 ## Architecture Choice: C Extension vs Subprocess
 
 **Why C Extension is Better:**
@@ -21,7 +23,7 @@ Implemented a **Python C extension module** (`audio_writer`) that provides high-
 
 ### Core Implementation
 
-1. **`x32recorder/audio_writer.c`** (315 lines)
+1. **`audio_writer_ext/audio_writer.c`** (315 lines)
    - Python C API extension module
    - NumPy C API integration for array access
    - Two functions:
@@ -31,9 +33,15 @@ Implemented a **Python C extension module** (`audio_writer`) that provides high-
    - Direct memory access (zero-copy where possible)
    - Batch processing of entire audio frames
 
-2. **`setup.py`** (25 lines)
-   - setuptools configuration
+2. **`audio_writer_ext/README.md`**
+   - Explains the purpose of the separate directory
+   - Quick reference for building
+   - Links to main documentation
+
+3. **`setup.py`** (25 lines)
+   - setuptools configuration for C extension ONLY
    - NumPy include directories
+   - Points to `audio_writer_ext/audio_writer.c`
    - Compiler optimization flags:
      - GCC/Clang: `-O3 -march=native -ffast-math`
      - MSVC: `/O2 /fp:fast`
@@ -41,7 +49,7 @@ Implemented a **Python C extension module** (`audio_writer`) that provides high-
 
 ### Modified Files
 
-3. **`x32recorder/controller.py`**
+4. **`x32recorder/controller.py`**
    - Auto-detection of C extension
    - Falls back to Python if not available
    - Modified `_process_sounddevice_data()` to use C extension

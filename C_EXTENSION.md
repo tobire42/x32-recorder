@@ -4,6 +4,8 @@
 
 The `audio_writer` C extension module provides **3-5x faster** audio processing compared to pure Python by handling the performance-critical float32 → 24-bit PCM conversion and multi-channel file writing in compiled C code.
 
+**Location**: The C extension source code is in the `audio_writer_ext/` directory to keep it separate from the main project build system.
+
 ## Why Use the C Extension?
 
 **Performance Comparison (8-channel recording):**
@@ -27,12 +29,13 @@ The C extension processes audio data directly in memory without Python interpret
 └────────┬────────┘
          │ NumPy array (frames, channels)
          ▼
-┌─────────────────┐
-│ audio_writer.c  │ (C extension)
-│  - float32→24bit│
-│  - Multi-channel│
-│  - Direct write │
-└────────┬────────┘
+┌─────────────────────────┐
+│ audio_writer_ext/       │ (C extension directory)
+│   audio_writer.c        │
+│  - float32→24bit        │
+│  - Multi-channel        │
+│  - Direct write         │
+└────────┬────────────────┘
          │
          ▼
 ┌─────────────────┐

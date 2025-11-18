@@ -142,8 +142,8 @@ build/
 *.pyd
 *.o
 *.obj
-audio_writer.c
 audio_writer*.so
 audio_writer*.pyd
-x32recorder/audio_writer*.so
-x32recorder/audio_writer*.pyd
+audio_writer_ext/*.o
+audio_writer_ext/*.obj
+audio_writer_ext/build/
